@@ -682,10 +682,10 @@ YOUR PUBLIC KEY GOES HERE
             throw new Error("location was not present in API response");
           }
 
-          return `the current location of agustin is: ${String(location).toLowerCase()}`;
+          return `current location: ${String(location).toLowerCase()}`;
 
         } catch (error) {
-          return `the current location of agustin is: unavailable (${error.message || error})`;
+          return `my current location is unavailable (${error.message || error})`;
         }
       },
 
