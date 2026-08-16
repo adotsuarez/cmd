@@ -419,46 +419,36 @@
      */
 
     .status {
-      position: fixed;
-
-      right:
-        max(
-          18px,
-          env(safe-area-inset-right)
-        );
-
-      bottom:
-        max(
-          14px,
-          env(safe-area-inset-bottom)
-        );
-
-      /*
-       * visualViewport keeps this aligned when the keyboard
-       * changes the visible portion of the screen.
-       */
-      transform: translateY(
-        calc(-1 * var(--visual-viewport-offset-top, 0px))
-      );
-
-      width: 1em;
-      height: 1em;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      color: var(--fg);
-
-      font-family: var(--font);
-      font-size: var(--font-size);
-      line-height: 1;
-
-      user-select: none;
-      pointer-events: none;
-
-      z-index: 10;
-    }
+	  position: fixed;
+	
+	  right: max(
+	    18px,
+	    env(safe-area-inset-right)
+	  );
+	
+	  /*
+	   * JS updates this when the visual viewport changes.
+	   */
+	  bottom: var(--status-bottom, 14px);
+	
+	  width: 1em;
+	  height: 1em;
+	
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	
+	  color: var(--fg);
+	
+	  font-family: var(--font);
+	  font-size: var(--font-size);
+	  line-height: 1;
+	
+	  user-select: none;
+	  pointer-events: none;
+	
+	  z-index: 10;
+	}
 
 
     .status-symbol {
@@ -649,7 +639,7 @@ YOUR PUBLIC KEY GOES HERE
           "",
           "  pgp           public PGP key",
           "  about         brief about-me",
-		  "  adotwhere     current location",
+		  "  where         current location",
 		  "  info &lt;cmd&gt;    info on a command",
           "  clear         clear the terminal",
           "  help          show available commands"
@@ -666,7 +656,7 @@ YOUR PUBLIC KEY GOES HERE
         return "i am agus (<a href='https://www.linkedin.com/in/adotsuarez'>adotsuarez</a>): a railway safety engineer that likes trains, lifts, antennas and other super-cool electronic devices. i use computers to interact with them. ain't that fun?";
       },
 
-      async adotwhere() {
+      async where() {
         try {
           const response = await fetch(
             "https://px01.thisisadot.me/api/adotwhere/get",
@@ -717,8 +707,8 @@ YOUR PUBLIC KEY GOES HERE
 		case "pgp":
 		  return "pgp — displays the public pgp key used for encrypted communication. the key is safe to share publicly and can be imported into a pgp-compatible application.";
 
-		case "adotwhere":
-		  return "adotwhere — fetches real-time information about my current location. because the information is retrieved in real time (i try to update it when i go somewhere), the result may change between executions.";
+		case "where":
+		  return "where — uses the 'adotwhere' service to fetch real-time information about my location. because the information is retrieved live, the result may change between executions.";
 
 		case "info":
 		  return "info — provides detailed information about another command. use `info &lt;cmd&gt;` to learn what a specific command does, what it is used for, and whether it accepts arguments.";
@@ -856,9 +846,17 @@ YOUR PUBLIC KEY GOES HERE
 	
 	  const viewport = window.visualViewport;
 	
+	  /*
+	   * Distance from the bottom of the layout viewport
+	   * to the bottom of the currently visible viewport.
+	   */
+	  const bottomOffset =
+	    window.innerHeight -
+	    (viewport.offsetTop + viewport.height);
+	
 	  document.documentElement.style.setProperty(
-	    "--visual-viewport-offset-top",
-	    `${viewport.offsetTop}px`
+	    "--status-bottom",
+	    `${Math.max(14, bottomOffset + 14)}px`
 	  );
 	}
 
