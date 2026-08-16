@@ -195,6 +195,7 @@
        */
       height: calc(100vh - 2em);
       height: calc(100dvh - 2em);
+      height: calc(var(--visual-viewport-height, 100dvh) - 2em);
 
       margin: 0 auto;
 
@@ -381,7 +382,11 @@
       /*
        * Prevent iOS from zooming when the input receives focus.
        */
-      font-size: max(14px, var(--font-size));
+      /*
+       * Keep the input at least 16px on mobile so iOS Safari
+       * does not zoom when the command field receives focus.
+       */
+      font-size: max(16px, var(--font-size));
     }
 
 
@@ -414,6 +419,14 @@
           14px,
           env(safe-area-inset-bottom)
         );
+
+      /*
+       * visualViewport keeps this aligned when the keyboard
+       * changes the visible portion of the screen.
+       */
+      transform: translateY(
+        calc(-1 * var(--visual-viewport-offset-top, 0px))
+      );
 
       width: 1em;
       height: 1em;
@@ -605,7 +618,7 @@
      * Anything stored in this HTML/JS is public.
      */
     const PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-  Not available yet. Expected by week 40.
+YOUR PUBLIC KEY GOES HERE
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 
@@ -664,13 +677,19 @@
            * Accept the location whether the API returns it
            * directly or inside a common response property.
            */
-		  const location = data?.message?.status;
+          const location =
+            data?.location ??
+            data?.current_location ??
+            data?.where ??
+            data?.data?.location ??
+            data?.data?.current_location ??
+            data?.data?.where;
 
           if (location === undefined || location === null) {
             throw new Error("location was not present in API response");
           }
 
-          return `the current location of agustin is: ${location}`;
+          return `the current location of agustin is: ${String(location).toLowerCase()}`;
 
         } catch (error) {
           return `the current location of agustin is: unavailable (${error.message || error})`;
@@ -801,6 +820,48 @@
       refreshLineHeight,
       { passive: true }
     );
+
+
+    /*
+     * Keep the terminal synchronized with the actual visible
+     * viewport. Mobile keyboards change visualViewport.height.
+     */
+    function updateVisualViewport() {
+
+      if (!window.visualViewport) {
+        return;
+      }
+
+      const viewport = window.visualViewport;
+
+      document.documentElement.style.setProperty(
+        "--visual-viewport-height",
+        `${viewport.height}px`
+      );
+
+      document.documentElement.style.setProperty(
+        "--visual-viewport-offset-top",
+        `${viewport.offsetTop}px`
+      );
+    }
+
+
+    if (window.visualViewport) {
+
+      updateVisualViewport();
+
+      window.visualViewport.addEventListener(
+        "resize",
+        updateVisualViewport,
+        { passive: true }
+      );
+
+      window.visualViewport.addEventListener(
+        "scroll",
+        updateVisualViewport,
+        { passive: true }
+      );
+    }
 
 
     /*
