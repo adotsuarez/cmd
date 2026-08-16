@@ -664,13 +664,7 @@
            * Accept the location whether the API returns it
            * directly or inside a common response property.
            */
-          const location =
-            data?.location ??
-            data?.current_location ??
-            data?.where ??
-            data?.data?.location ??
-            data?.data?.current_location ??
-            data?.data?.where;
+		  const location = data?.message?.status;
 
           if (location === undefined || location === null) {
             throw new Error("location was not present in API response");
