@@ -674,16 +674,9 @@ YOUR PUBLIC KEY GOES HERE
           const data = await response.json();
 
           /*
-           * Accept the location whether the API returns it
-           * directly or inside a common response property.
+           * Accept the location from the API.
            */
-          const location =
-            data?.location ??
-            data?.current_location ??
-            data?.where ??
-            data?.data?.location ??
-            data?.data?.current_location ??
-            data?.data?.where;
+          const location = data?.message?.status;
 
           if (location === undefined || location === null) {
             throw new Error("location was not present in API response");
