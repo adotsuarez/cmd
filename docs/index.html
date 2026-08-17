@@ -1,11 +1,11 @@
 <!doctype html>
 <!--INFO:
-	● Done by a human (me).
-	● AI helped when in a hurry (fixing little bugs).
-	● Yes, the flashing dot does nothing. Looks cool, huh?
-	● As we now read this together, we are on the same team.
-	● Should not break. If broken, please reach me!
-	● I really hope you have a great day! :)
+  ● Done by a human (me).
+  ● AI helped when in a hurry (fixing little bugs).
+  ● Yes, the flashing dot does nothing. Looks cool, huh?
+  ● As we now read this together, we are on the same team.
+  ● Should not break. If broken, please reach me!
+  ● I really hope you have a great day! :)
 -->
 <html lang="en">
 <head>
@@ -56,6 +56,15 @@
        * The actual viewport width still wins on small devices.
        */
       --terminal-width: 80ch;
+
+      /*
+       * Vertical correction used to keep the status indicator
+       * attached to the visual viewport when the mobile
+       * keyboard is open.
+       *
+       * Normally this is 0px.
+       */
+      --visual-viewport-y-offset: 0px;
     }
 
 
@@ -116,50 +125,39 @@
     }
 
 
+    /*
+     * ----------------------------------------------------
+     * TOP BAR
+     * ----------------------------------------------------
+     */
 
     .top-bar {
       width: 100%;
       min-height: 2em;
+
       padding: 0 18px;
+
       display: flex;
       align-items: center;
+
       background: #c1c1c1;
       color: var(--fg);
+
       font-family: var(--font);
       font-size: var(--font-size);
       line-height: 1;
+
       white-space: nowrap;
       overflow: hidden;
     }
 
-    /* Rich hypertext inside terminal responses. */
-    .terminal-line strong,
-    .terminal-line b {
-      font-weight: 700;
-    }
-
-    .terminal-line em,
-    .terminal-line i {
-      font-style: italic;
-    }
-
-    .terminal-line a {
-      color: inherit;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .terminal-line a::after {
-      content: "↗";
-      text-decoration: none;
-      display: inline-block;
-    }
 
     .top-bar-title {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
 
     @media (max-width: 600px) {
       .top-bar {
@@ -195,20 +193,6 @@
        */
       height: calc(100vh - 2em);
       height: calc(100dvh - 2em);
-      @media (max-width: 600px) {
-		  html,
-		  body {
-		    position: relative;
-		    top: 0;
-		    transform: none;
-		  }
-		
-		  .terminal {
-		    position: relative;
-		    top: 0;
-		    margin-top: 0;
-		  }
-		}
 
       margin: 0 auto;
 
@@ -219,6 +203,7 @@
        * Safe-area support for iPhones and similar devices.
        */
       padding-top: env(safe-area-inset-top);
+
       padding-bottom:
         max(
           var(--bottom-space),
@@ -252,19 +237,16 @@
       -ms-overflow-style: none;
 
       /*
-       * Never allow the browser to chain this scroll into
-       * the page itself.
+       * Never allow this scroll to chain into the page.
        */
       overscroll-behavior: contain;
 
       /*
-       * Do NOT use smooth scrolling.
        * Terminal scrolling should be abrupt.
        */
       scroll-behavior: auto;
 
       /*
-       * Disable browser scroll anchoring.
        * We control the scroll position ourselves.
        */
       overflow-anchor: none;
@@ -284,9 +266,10 @@
     /*
      * Every terminal line is a real element.
      *
-     * This is what makes exact line-by-line scrolling
-     * possible even with line-height: 1.
+     * This makes exact line-by-line scrolling possible even
+     * with line-height: 1.
      */
+
     .terminal-line {
       width: 100%;
       min-height: 1em;
@@ -303,8 +286,39 @@
 
 
     /*
+     * Rich hypertext inside terminal responses.
+     */
+
+    .terminal-line strong,
+    .terminal-line b {
+      font-weight: 700;
+    }
+
+
+    .terminal-line em,
+    .terminal-line i {
+      font-style: italic;
+    }
+
+
+    .terminal-line a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+
+    .terminal-line a::after {
+      content: "↗";
+      text-decoration: none;
+      display: inline-block;
+    }
+
+
+    /*
      * Prompt and command share the same line grid.
      */
+
     .command-line {
       display: flex;
       align-items: baseline;
@@ -378,7 +392,7 @@
       color: var(--fg);
 
       font-family: inherit;
-      font-size: inherit;
+      font-size: max(16px, var(--font-size));
       line-height: 1em;
 
       /*
@@ -391,21 +405,13 @@
        */
       -webkit-appearance: none;
       appearance: none;
-
-      /*
-       * Prevent iOS from zooming when the input receives focus.
-       */
-      /*
-       * Keep the input at least 16px on mobile so iOS Safari
-       * does not zoom when the command field receives focus.
-       */
-      font-size: max(16px, var(--font-size));
     }
 
 
     /*
      * Remove the native clear button on some browsers.
      */
+
     #command::-webkit-search-cancel-button,
     #command::-webkit-search-decoration {
       -webkit-appearance: none;
@@ -416,39 +422,69 @@
      * ----------------------------------------------------
      * STATUS INDICATOR
      * ----------------------------------------------------
+     *
+     * The status indicator is fixed to the layout viewport.
+     *
+     * When a mobile keyboard changes the visual viewport,
+     * JavaScript applies the exact visual-viewport offset
+     * through --visual-viewport-y-offset.
+     *
+     * This is deliberately NOT based on visualViewport.offsetTop
+     * alone.
      */
 
     .status {
-	  position: fixed;
-	
-	  right: max(
-	    18px,
-	    env(safe-area-inset-right)
-	  );
-	
-	  /*
-	   * JS updates this when the visual viewport changes.
-	   */
-	  bottom: var(--status-bottom, 14px);
-	
-	  width: 1em;
-	  height: 1em;
-	
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	
-	  color: var(--fg);
-	
-	  font-family: var(--font);
-	  font-size: var(--font-size);
-	  line-height: 1;
-	
-	  user-select: none;
-	  pointer-events: none;
-	
-	  z-index: 10;
-	}
+      position: fixed;
+
+      right:
+        max(
+          18px,
+          env(safe-area-inset-right)
+        );
+
+      bottom:
+        max(
+          14px,
+          env(safe-area-inset-bottom)
+        );
+
+      /*
+       * Move the indicator from the layout viewport's bottom
+       * to the visual viewport's bottom.
+       *
+       * When there is no keyboard:
+       *
+       *   visualViewport.height == layoutViewport.height
+       *   visualViewport.offsetTop == 0
+       *   offset == 0
+       *
+       * When the keyboard reduces the visual viewport,
+       * this becomes negative by approximately the amount
+       * hidden below the visual viewport.
+       */
+      transform:
+        translateY(
+          var(--visual-viewport-y-offset)
+        );
+
+      width: 1em;
+      height: 1em;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: var(--fg);
+
+      font-family: var(--font);
+      font-size: var(--font-size);
+      line-height: 1;
+
+      user-select: none;
+      pointer-events: none;
+
+      z-index: 10;
+    }
 
 
     .status-symbol {
@@ -492,15 +528,18 @@
     /*
      * Very narrow phones.
      */
+
     @media (max-width: 360px) {
 
       .terminal {
         width: calc(100vw - 24px);
       }
 
+
       :root {
         --font-size: 12px;
       }
+
 
       .prompt {
         margin-right: 7px;
@@ -511,6 +550,7 @@
     /*
      * Landscape phones/tablets.
      */
+
     @media (orientation: landscape) and (max-height: 500px) {
 
       :root {
@@ -522,11 +562,8 @@
 
     /*
      * Respect reduced-motion preferences.
-     *
-     * There isn't actually animation in the terminal itself,
-     * but this prevents future browser-level behavior from
-     * introducing smooth movement.
      */
+
     @media (prefers-reduced-motion: reduce) {
 
       .history {
@@ -543,6 +580,7 @@
     <div class="top-bar-title">cmd.thisisadot.me</div>
   </header>
 
+
   <main
     class="terminal"
     aria-label="Command line interface"
@@ -554,6 +592,7 @@
       Every visual terminal line is represented by its own
       element. This guarantees exact line-by-line scrolling.
     -->
+
     <div
       class="history"
       id="history"
@@ -565,6 +604,7 @@
     <!--
       Current command input.
     -->
+
     <form
       class="command-line cursor-line"
       id="command-form"
@@ -576,6 +616,7 @@
         class="prompt"
         aria-hidden="true"
       >•</span>
+
 
       <input
         id="command"
@@ -599,6 +640,7 @@
   <!--
     Bottom-right terminal indicator.
   -->
+
   <div
     class="status"
     aria-hidden="true"
@@ -620,6 +662,7 @@
      *
      * Anything stored in this HTML/JS is public.
      */
+
     const PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 YOUR PUBLIC KEY GOES HERE
 -----END PGP PUBLIC KEY BLOCK-----`;
@@ -639,8 +682,8 @@ YOUR PUBLIC KEY GOES HERE
           "",
           "  pgp           public PGP key",
           "  about         brief about-me",
-		  "  where         current location",
-		  "  info &lt;cmd&gt;    info on a command",
+          "  where         current location",
+          "  info <cmd>    info on a command",
           "  clear         clear the terminal",
           "  help          show available commands"
         ].join("\n");
@@ -656,77 +699,123 @@ YOUR PUBLIC KEY GOES HERE
         return "i am agus (<a href='https://www.linkedin.com/in/adotsuarez'>adotsuarez</a>): a railway safety engineer that likes trains, lifts, antennas and other super-cool electronic devices. i use computers to interact with them. ain't that fun?";
       },
 
+
+      /*
+       * Public command: "where"
+       *
+       * The implementation still uses the existing
+       * adotwhere service and API endpoint.
+       */
+
       async where() {
+
         try {
+
           const response = await fetch(
             "https://px01.thisisadot.me/api/adotwhere/get",
             {
               method: "GET",
+
               headers: {
                 "Accept": "application/json"
               }
             }
           );
 
+
           if (!response.ok) {
+
             throw new Error(
               `location request failed (${response.status})`
             );
           }
 
-          const data = await response.json();
+
+          const data =
+            await response.json();
+
 
           /*
            * Accept the location from the API.
            */
-          const location = data?.message?.status;
 
-          if (location === undefined || location === null) {
-            throw new Error("location was not present in API response");
+          const location =
+            data?.message?.status;
+
+
+          if (
+            location === undefined ||
+            location === null
+          ) {
+
+            throw new Error(
+              "location was not present in API response"
+            );
           }
+
 
           return `current location: ${String(location).toLowerCase()}`;
 
         } catch (error) {
+
           return `my current location is unavailable (${error.message || error})`;
         }
       },
 
 
       clear() {
+
         history.replaceChildren();
+
         return null;
       },
-	  
-	  info(parts) {
-	  switch (parts[0]) {
 
-		case "about":
-		  return "about — displays information about me, including my interests and background. this command does not require any arguments.";
 
-		case "pgp":
-		  return "pgp — displays the public pgp key used for encrypted communication. the key is safe to share publicly and can be imported into a pgp-compatible application.";
+      info(parts) {
 
-		case "where":
-		  return "where — uses the 'adotwhere' service to fetch real-time information about my location. because the information is retrieved live, the result may change between executions.";
+        switch (parts[0]) {
 
-		case "info":
-		  return "info — provides detailed information about another command. use `info &lt;cmd&gt;` to learn what a specific command does, what it is used for, and whether it accepts arguments.";
+          case "about":
 
-		case "help":
-		  return "help — displays a concise list of the commands currently available in this terminal. use `info &lt;cmd&gt;` when you want more detailed information about a particular command.";
+            return "about — displays information about me, including my interests and background. this command does not require any arguments.";
 
-		case "clear":
-		  return "clear — removes all previously displayed terminal history from the screen. it does not reload the page or change the available commands.";
 
-		default:
-		  if (!parts[0]) {
-			return "usage: info &lt;cmd&gt;";
-		  }
+          case "pgp":
 
-		  return `command not found: ${parts[0]}.\nuse "help" to see the available commands.`;
-	  }
-	},
+            return "pgp — displays the public pgp key used for encrypted communication. the key is safe to share publicly and can be imported into a pgp-compatible application.";
+
+
+          case "where":
+
+            return "where — uses the 'adotwhere' service to fetch real-time information about my location. because the information is retrieved live, the result may change between executions.";
+
+
+          case "info":
+
+            return "info — provides detailed information about another command. use `info <cmd>` to learn what a specific command does, what it is used for, and whether it accepts arguments.";
+
+
+          case "help":
+
+            return "help — displays a concise list of the commands currently available in this terminal. use `info <cmd>` when you want more detailed information about a particular command.";
+
+
+          case "clear":
+
+            return "clear — removes all previously displayed terminal history from the screen. it does not reload the page or change the available commands.";
+
+
+          default:
+
+            if (!parts[0]) {
+
+              return "usage: info <cmd>";
+            }
+
+
+            return `command not found: ${parts[0]}.\nuse "help" to see the available commands.`;
+        }
+      }
     };
 
 
@@ -739,43 +828,155 @@ YOUR PUBLIC KEY GOES HERE
     const form =
       document.getElementById("command-form");
 
+
     const input =
       document.getElementById("command");
+
 
     const history =
       document.getElementById("history");
 
+
     const statusSymbol =
       document.getElementById("status-symbol");
 
-	function keepPageAtTop() {
-	  if (window.innerWidth <= 600) {
-		requestAnimationFrame(() => {
-		  window.scrollTo(0, 0);
-		});
-	
-		setTimeout(() => {
-		  window.scrollTo(0, 0);
-		}, 50);
-	  }
-	}
-	
-	input.addEventListener(
-	  "focus",
-	  keepPageAtTop,
-	  { passive: true }
-	);
+
+    /*
+     * ====================================================
+     * MOBILE FOCUS
+     * ====================================================
+     *
+     * Keep the layout viewport at the top when the keyboard
+     * opens on small screens.
+     */
+
+    function keepPageAtTop() {
+
+      if (window.innerWidth <= 600) {
+
+        requestAnimationFrame(() => {
+          window.scrollTo(0, 0);
+        });
+
+
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, 50);
+      }
+    }
+
+
+    input.addEventListener(
+      "focus",
+      keepPageAtTop,
+      { passive: true }
+    );
+
+
+    /*
+     * ====================================================
+     * VISUAL VIEWPORT
+     * ====================================================
+     *
+     * Mobile browsers have a layout viewport and a visual
+     * viewport. The on-screen keyboard can shrink the visual
+     * viewport without shrinking the layout viewport.
+     *
+     * The status indicator is position: fixed, so it normally
+     * follows the layout viewport.
+     *
+     * We correct that position by:
+     *
+     *   visualViewport.offsetTop
+     *   + visualViewport.height
+     *   - layoutViewport.height
+     *
+     * This is the important difference from the old code,
+     * which only used offsetTop.
+     *
+     * With no keyboard:
+     *
+     *   offsetTop + height - layoutHeight = 0
+     *
+     * With the keyboard open:
+     *
+     *   offsetTop + height - layoutHeight
+     *
+     * becomes the amount required to move the fixed element
+     * up to the bottom edge of the visible viewport.
+     */
+
+    function updateVisualViewport() {
+
+      const viewport =
+        window.visualViewport;
+
+
+      if (!viewport) {
+        return;
+      }
+
+
+      const layoutViewportHeight =
+        document.documentElement.clientHeight;
+
+
+      const visualViewportBottom =
+        viewport.offsetTop +
+        viewport.height;
+
+
+      const yOffset =
+        visualViewportBottom -
+        layoutViewportHeight;
+
+
+      document.documentElement.style.setProperty(
+        "--visual-viewport-y-offset",
+        `${yOffset}px`
+      );
+    }
+
+
+    if (window.visualViewport) {
+
+      updateVisualViewport();
+
+
+      window.visualViewport.addEventListener(
+        "resize",
+        updateVisualViewport,
+        { passive: true }
+      );
+
+
+      window.visualViewport.addEventListener(
+        "scroll",
+        updateVisualViewport,
+        { passive: true }
+      );
+    }
+
+
+    /*
+     * The layout viewport itself can also change when the
+     * browser UI changes orientation or dimensions.
+     */
+
+    window.addEventListener(
+      "resize",
+      updateVisualViewport,
+      { passive: true }
+    );
+
 
     /*
      * ====================================================
      * TERMINAL LINE HEIGHT
      * ====================================================
      *
-     * We intentionally calculate the actual rendered line
-     * height rather than assuming the font size.
-     *
-     * This remains accurate if the user changes browser
-     * font settings or if the responsive font size changes.
+     * Calculate the actual rendered line height rather than
+     * assuming it equals the font size.
      */
 
     function getLineHeight() {
@@ -783,24 +984,46 @@ YOUR PUBLIC KEY GOES HERE
       const sample =
         document.createElement("div");
 
+
       sample.className =
         "terminal-line";
 
-      sample.style.height = "1em";
-      sample.style.minHeight = "1em";
 
-      sample.textContent = "M";
+      sample.style.height =
+        "1em";
 
-      sample.style.position = "absolute";
-      sample.style.visibility = "hidden";
-      sample.style.pointerEvents = "none";
 
-      document.body.appendChild(sample);
+      sample.style.minHeight =
+        "1em";
+
+
+      sample.textContent =
+        "M";
+
+
+      sample.style.position =
+        "absolute";
+
+
+      sample.style.visibility =
+        "hidden";
+
+
+      sample.style.pointerEvents =
+        "none";
+
+
+      document.body.appendChild(
+        sample
+      );
+
 
       const height =
         sample.getBoundingClientRect().height;
 
+
       sample.remove();
+
 
       return height || 1;
     }
@@ -809,20 +1032,26 @@ YOUR PUBLIC KEY GOES HERE
     /*
      * Cached line height.
      */
-    let lineHeight = getLineHeight();
+
+    let lineHeight =
+      getLineHeight();
+
 
     /*
      * Command recall history.
      */
-    const commandHistory = [];
-    let historyIndex = -1;
-    let historyDraft = "";
 
+    const commandHistory = [];
+
+    let historyIndex = -1;
+
+    let historyDraft = "";
 
 
     /*
      * Recalculate when the viewport/font environment changes.
      */
+
     function refreshLineHeight() {
       lineHeight = getLineHeight();
     }
@@ -835,55 +1064,6 @@ YOUR PUBLIC KEY GOES HERE
     );
 
 
-    /*
-     * Keep the terminal synchronized with the actual visible
-     * viewport. Mobile keyboards change visualViewport.height.
-     */
-    function updateVisualViewport() {
-	  if (!window.visualViewport) {
-	    return;
-	  }
-	
-	  const viewport = window.visualViewport;
-	
-	  /*
-	   * Distance from the bottom of the layout viewport
-	   * to the bottom of the currently visible viewport.
-	   */
-	  const bottomOffset =
-	    window.innerHeight -
-	    (viewport.offsetTop + viewport.height);
-	
-	  document.documentElement.style.setProperty(
-	    "--status-bottom",
-	    `${Math.max(14, bottomOffset + 14)}px`
-	  );
-	}
-
-
-    if (window.visualViewport) {
-
-      updateVisualViewport();
-
-      window.visualViewport.addEventListener(
-        "resize",
-        updateVisualViewport,
-        { passive: true }
-      );
-
-      window.visualViewport.addEventListener(
-        "scroll",
-        updateVisualViewport,
-        { passive: true }
-      );
-    }
-
-
-    /*
-     * Visual viewport is particularly useful on mobile:
-     * when the keyboard opens, Safari/Chrome can change the
-     * visual viewport without changing the layout viewport.
-     */
     if (window.visualViewport) {
 
       window.visualViewport.addEventListener(
@@ -905,93 +1085,191 @@ YOUR PUBLIC KEY GOES HERE
       const line =
         document.createElement("div");
 
+
       line.className =
         "terminal-line";
+
 
       line.innerHTML =
         renderResponseMarkup(text);
 
+
       history.appendChild(line);
+
 
       return line;
     }
 
+
     /*
      * Render a deliberately small set of response HTML.
-     * Supported: <b>, <strong>, <i>, <em>, <a href>, and
-     * <span style="color: ...">. Everything else is escaped.
+     *
+     * Supported:
+     *
+     *   <b>
+     *   <strong>
+     *   <i>
+     *   <em>
+     *   <a href>
+     *   <span style="color: ...">
+     *
+     * Everything else is escaped/removed.
      */
+
     function renderResponseMarkup(text = "") {
 
       const template =
         document.createElement("template");
 
-      template.innerHTML = String(text);
 
-      const allowedTags = new Set([
-        "B", "STRONG", "I", "EM", "A", "SPAN"
-      ]);
+      template.innerHTML =
+        String(text);
 
-      const allowedStyles = new Set([
-        "color"
-      ]);
+
+      const allowedTags =
+        new Set([
+          "B",
+          "STRONG",
+          "I",
+          "EM",
+          "A",
+          "SPAN"
+        ]);
+
 
       function clean(node) {
 
-        if (node.nodeType === Node.TEXT_NODE) {
-          return document.createTextNode(node.nodeValue);
+        if (
+          node.nodeType ===
+          Node.TEXT_NODE
+        ) {
+
+          return document.createTextNode(
+            node.nodeValue
+          );
         }
 
-        if (node.nodeType !== Node.ELEMENT_NODE) {
+
+        if (
+          node.nodeType !==
+          Node.ELEMENT_NODE
+        ) {
+
           return document.createDocumentFragment();
         }
 
-        if (!allowedTags.has(node.tagName)) {
-          const fragment = document.createDocumentFragment();
-          for (const child of node.childNodes) {
-            fragment.appendChild(clean(child));
+
+        if (
+          !allowedTags.has(
+            node.tagName
+          )
+        ) {
+
+          const fragment =
+            document.createDocumentFragment();
+
+
+          for (
+            const child of node.childNodes
+          ) {
+
+            fragment.appendChild(
+              clean(child)
+            );
           }
+
+
           return fragment;
         }
 
+
         const el =
-          document.createElement(node.tagName.toLowerCase());
+          document.createElement(
+            node.tagName.toLowerCase()
+          );
+
 
         if (node.tagName === "A") {
-          const href = node.getAttribute("href") || "";
 
-          if (/^(https?:|mailto:)/i.test(href)) {
-            el.setAttribute("href", href);
-            el.setAttribute("target", "_blank");
-            el.setAttribute("rel", "noopener noreferrer");
+          const href =
+            node.getAttribute("href") ||
+            "";
+
+
+          if (
+            /^(https?:|mailto:)/i.test(href)
+          ) {
+
+            el.setAttribute(
+              "href",
+              href
+            );
+
+
+            el.setAttribute(
+              "target",
+              "_blank"
+            );
+
+
+            el.setAttribute(
+              "rel",
+              "noopener noreferrer"
+            );
           }
         }
+
 
         if (node.tagName === "SPAN") {
-          const color = node.style.color;
+
+          const color =
+            node.style.color;
+
+
           if (color) {
-            el.style.color = color;
+
+            el.style.color =
+              color;
           }
         }
 
-        for (const child of node.childNodes) {
-          el.appendChild(clean(child));
+
+        for (
+          const child of node.childNodes
+        ) {
+
+          el.appendChild(
+            clean(child)
+          );
         }
+
 
         return el;
       }
 
+
       const fragment =
         document.createDocumentFragment();
 
-      for (const child of template.content.childNodes) {
-        fragment.appendChild(clean(child));
+
+      for (
+        const child of template.content.childNodes
+      ) {
+
+        fragment.appendChild(
+          clean(child)
+        );
       }
+
 
       const container =
         document.createElement("div");
 
-      container.appendChild(fragment);
+
+      container.appendChild(
+        fragment
+      );
+
 
       return container.innerHTML;
     }
@@ -1002,10 +1280,12 @@ YOUR PUBLIC KEY GOES HERE
      *
      * Long commands are allowed to wrap naturally.
      */
+
     function addCommand(command) {
 
       const line =
         document.createElement("div");
+
 
       line.className =
         "terminal-line command-line";
@@ -1014,8 +1294,10 @@ YOUR PUBLIC KEY GOES HERE
       const prompt =
         document.createElement("span");
 
+
       prompt.className =
         "prompt";
+
 
       prompt.textContent =
         "•";
@@ -1024,8 +1306,10 @@ YOUR PUBLIC KEY GOES HERE
       const text =
         document.createElement("span");
 
+
       text.className =
         "command-text";
+
 
       text.textContent =
         command;
@@ -1036,6 +1320,7 @@ YOUR PUBLIC KEY GOES HERE
         text
       );
 
+
       history.appendChild(line);
     }
 
@@ -1043,21 +1328,20 @@ YOUR PUBLIC KEY GOES HERE
     /*
      * Add arbitrary multiline output.
      *
-     * Important:
-     *
-     * We create one DOM element per line rather than one
-     * <pre> containing everything.
-     *
-     * This is what makes the scroll position mathematically
-     * correspond to terminal lines.
+     * One DOM element per line guarantees exact
+     * line-by-line scrolling.
      */
+
     function addOutput(text) {
 
       const lines =
         String(text).split("\n");
 
 
-      for (const line of lines) {
+      for (
+        const line of lines
+      ) {
+
         addLine(line);
       }
     }
@@ -1065,9 +1349,8 @@ YOUR PUBLIC KEY GOES HERE
 
     /*
      * Keep the terminal at the newest line.
-     *
-     * No smooth scrolling.
      */
+
     function scrollToBottom() {
 
       history.scrollTop =
@@ -1079,7 +1362,11 @@ YOUR PUBLIC KEY GOES HERE
     /*
      * Add command + output.
      */
-    function addHistory(command, result) {
+
+    function addHistory(
+      command,
+      result
+    ) {
 
       addCommand(command);
 
@@ -1095,15 +1382,16 @@ YOUR PUBLIC KEY GOES HERE
 
 
       /*
-       * Blank line between commands, similar to a clean
-       * terminal transcript.
+       * Blank line between commands.
        */
+
       addLine("");
 
 
       /*
        * New output always appears immediately.
        */
+
       requestAnimationFrame(
         scrollToBottom
       );
@@ -1129,21 +1417,34 @@ YOUR PUBLIC KEY GOES HERE
 
       /*
        * Store commands for Up/Down recall.
+       *
        * Consecutive duplicate commands are not stored twice.
        */
+
       if (
         commandHistory.length === 0 ||
-        commandHistory[commandHistory.length - 1] !== command
+        commandHistory[
+          commandHistory.length - 1
+        ] !== command
       ) {
-        commandHistory.push(command);
+
+        commandHistory.push(
+          command
+        );
       }
 
-      historyIndex = commandHistory.length;
-      historyDraft = "";
+
+      historyIndex =
+        commandHistory.length;
+
+
+      historyDraft =
+        "";
 
 
       const parts =
         command.split(/\s+/);
+
 
       const name =
         parts.shift().toLowerCase();
@@ -1152,6 +1453,7 @@ YOUR PUBLIC KEY GOES HERE
       /*
        * Clear.
        */
+
       if (name === "clear") {
 
         addCommand(command);
@@ -1165,6 +1467,7 @@ YOUR PUBLIC KEY GOES HERE
       /*
        * Known command.
        */
+
       if (
         Object.prototype.hasOwnProperty.call(
           COMMANDS,
@@ -1176,14 +1479,20 @@ YOUR PUBLIC KEY GOES HERE
           COMMANDS[name](parts)
         )
           .then((result) => {
-            addHistory(command, result);
+
+            addHistory(
+              command,
+              result
+            );
           })
           .catch((error) => {
+
             addHistory(
               command,
               `error: ${error.message || error}`
             );
           });
+
 
         return;
       }
@@ -1192,9 +1501,10 @@ YOUR PUBLIC KEY GOES HERE
       /*
        * Unknown command.
        */
+
       addHistory(
         command,
-        `command not found: ${name}.\nuse "help" to see the available commands, or "info &lt;cmd&gt;" to learn more about a specific command.`
+        `command not found: ${name}.\nuse "help" to see the available commands, or "info <cmd>" to learn more about a specific command.`
       );
     }
 
@@ -1211,21 +1521,21 @@ YOUR PUBLIC KEY GOES HERE
 
         event.preventDefault();
 
-        execute(input.value);
 
-        input.value = "";
+        execute(
+          input.value
+        );
+
+
+        input.value =
+          "";
+
 
         input.focus();
       }
     );
 
 
-    /*
-     * Clicking anywhere on the page returns focus to the
-     * command line.
-     *
-     * Don't steal focus when the user is selecting text.
-     */
     /*
      * ====================================================
      * COMMAND HISTORY RECALL
@@ -1236,48 +1546,82 @@ YOUR PUBLIC KEY GOES HERE
       "keydown",
       (event) => {
 
-        if (event.key === "ArrowUp") {
+        if (
+          event.key === "ArrowUp"
+        ) {
 
           event.preventDefault();
 
-          if (commandHistory.length === 0) {
+
+          if (
+            commandHistory.length === 0
+          ) {
+
             return;
           }
 
-          if (historyIndex === commandHistory.length) {
-            historyDraft = input.value;
+
+          if (
+            historyIndex ===
+            commandHistory.length
+          ) {
+
+            historyDraft =
+              input.value;
           }
 
+
           historyIndex =
-            Math.max(0, historyIndex - 1);
+            Math.max(
+              0,
+              historyIndex - 1
+            );
+
 
           input.value =
-            commandHistory[historyIndex];
+            commandHistory[
+              historyIndex
+            ];
+
 
           requestAnimationFrame(() => {
+
             input.selectionStart =
               input.selectionEnd =
                 input.value.length;
           });
 
+
           return;
         }
 
 
-        if (event.key === "ArrowDown") {
+        if (
+          event.key === "ArrowDown"
+        ) {
 
           event.preventDefault();
 
-          if (commandHistory.length === 0) {
+
+          if (
+            commandHistory.length === 0
+          ) {
+
             return;
           }
 
+
           historyIndex++;
 
-          if (historyIndex >= commandHistory.length) {
+
+          if (
+            historyIndex >=
+            commandHistory.length
+          ) {
 
             historyIndex =
               commandHistory.length;
+
 
             input.value =
               historyDraft;
@@ -1285,10 +1629,14 @@ YOUR PUBLIC KEY GOES HERE
           } else {
 
             input.value =
-              commandHistory[historyIndex];
+              commandHistory[
+                historyIndex
+              ];
           }
 
+
           requestAnimationFrame(() => {
+
             input.selectionStart =
               input.selectionEnd =
                 input.value.length;
@@ -1298,6 +1646,13 @@ YOUR PUBLIC KEY GOES HERE
     );
 
 
+    /*
+     * Clicking anywhere on the page returns focus to the
+     * command line.
+     *
+     * Don't steal focus when the user is selecting text.
+     */
+
     document.addEventListener(
       "click",
       (event) => {
@@ -1306,8 +1661,10 @@ YOUR PUBLIC KEY GOES HERE
           window.getSelection &&
           window.getSelection().toString()
         ) {
+
           return;
         }
+
 
         input.focus();
       }
@@ -1320,27 +1677,22 @@ YOUR PUBLIC KEY GOES HERE
      * ====================================================
      *
      * Every wheel action moves precisely one terminal line.
-     *
-     * We deliberately do NOT use:
-     *
-     *   scrollBy()
-     *
-     * with arbitrary browser pixel deltas.
-     *
-     * Instead we snap the scroll position to our line grid.
      */
 
     function snapScrollToLine() {
 
       refreshLineHeight();
 
+
       const current =
         history.scrollTop;
+
 
       const line =
         Math.round(
           current / lineHeight
         );
+
 
       history.scrollTop =
         line * lineHeight;
@@ -1351,14 +1703,17 @@ YOUR PUBLIC KEY GOES HERE
 
       refreshLineHeight();
 
+
       const currentLine =
         Math.round(
           history.scrollTop /
           lineHeight
         );
 
+
       const targetLine =
-        currentLine + amount;
+        currentLine +
+        amount;
 
 
       history.scrollTop =
@@ -1375,6 +1730,7 @@ YOUR PUBLIC KEY GOES HERE
      * Trackpads can emit very small deltas, so we accumulate
      * their movement until it reaches a meaningful threshold.
      */
+
     let wheelAccumulator = 0;
 
 
@@ -1385,24 +1741,22 @@ YOUR PUBLIC KEY GOES HERE
         event.preventDefault();
 
 
-        /*
-         * Normalize wheel direction.
-         */
         const delta =
           event.deltaMode === 1
             ? event.deltaY
             : event.deltaY / 40;
 
 
-        wheelAccumulator += delta;
+        wheelAccumulator +=
+          delta;
 
 
-        /*
-         * Don't move until enough movement has accumulated.
-         */
         if (
-          Math.abs(wheelAccumulator) < 1
+          Math.abs(
+            wheelAccumulator
+          ) < 1
         ) {
+
           return;
         }
 
@@ -1417,9 +1771,9 @@ YOUR PUBLIC KEY GOES HERE
 
           scrollLines(lines);
 
-          wheelAccumulator -= lines;
+          wheelAccumulator -=
+            lines;
         }
-
       },
       {
         passive: false
@@ -1443,6 +1797,7 @@ YOUR PUBLIC KEY GOES HERE
 
             event.preventDefault();
 
+
             const lines =
               Math.max(
                 1,
@@ -1451,6 +1806,7 @@ YOUR PUBLIC KEY GOES HERE
                   lineHeight
                 )
               );
+
 
             scrollLines(lines);
 
@@ -1462,6 +1818,7 @@ YOUR PUBLIC KEY GOES HERE
 
             event.preventDefault();
 
+
             const lines =
               Math.max(
                 1,
@@ -1470,6 +1827,7 @@ YOUR PUBLIC KEY GOES HERE
                   lineHeight
                 )
               );
+
 
             scrollLines(-lines);
 
@@ -1503,10 +1861,10 @@ YOUR PUBLIC KEY GOES HERE
      * TOUCH
      * ====================================================
      *
-     * Mobile users still need natural touch scrolling.
+     * Mobile users still get natural touch scrolling.
      *
-     * We allow the browser to handle the gesture, then snap
-     * to the nearest terminal line when the gesture ends.
+     * After momentum settles, snap to the nearest terminal
+     * line.
      */
 
     let touchTimer = null;
@@ -1516,12 +1874,11 @@ YOUR PUBLIC KEY GOES HERE
       "touchend",
       () => {
 
-        clearTimeout(touchTimer);
+        clearTimeout(
+          touchTimer
+        );
 
 
-        /*
-         * Wait for the browser's touch momentum to settle.
-         */
         touchTimer =
           setTimeout(
             snapScrollToLine,
@@ -1553,6 +1910,7 @@ YOUR PUBLIC KEY GOES HERE
         statusOn =
           !statusOn;
 
+
         statusSymbol.textContent =
           statusOn
             ? "●"
@@ -1573,14 +1931,16 @@ YOUR PUBLIC KEY GOES HERE
 
       refreshLineHeight();
 
-      input.focus();
+      updateVisualViewport();
 
+      input.focus();
     }
 
 
     /*
      * Standard load.
      */
+
     window.addEventListener(
       "load",
       initialize
@@ -1591,6 +1951,7 @@ YOUR PUBLIC KEY GOES HERE
      * Also initialize immediately in case the script is
      * moved or loaded differently later.
      */
+
     initialize();
 
   </script>
