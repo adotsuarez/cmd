@@ -683,7 +683,7 @@ YOUR PUBLIC KEY GOES HERE
           "  pgp           public PGP key",
           "  about         brief about-me",
           "  where         current location",
-          "  info <cmd>    info on a command",
+          "  info &lt;cmd&gt;    info on a command",
           "  clear         clear the terminal",
           "  help          show available commands"
         ].join("\n");
@@ -792,12 +792,12 @@ YOUR PUBLIC KEY GOES HERE
 
           case "info":
 
-            return "info — provides detailed information about another command. use `info <cmd>` to learn what a specific command does, what it is used for, and whether it accepts arguments.";
+            return "info — provides detailed information about another command. use `info &lt;cmd&gt;` to learn what a specific command does, what it is used for, and whether it accepts arguments.";
 
 
           case "help":
 
-            return "help — displays a concise list of the commands currently available in this terminal. use `info <cmd>` when you want more detailed information about a particular command.";
+            return "help — displays a concise list of the commands currently available in this terminal. use `info &lt;cmd&gt;` when you want more detailed information about a particular command.";
 
 
           case "clear":
@@ -809,7 +809,7 @@ YOUR PUBLIC KEY GOES HERE
 
             if (!parts[0]) {
 
-              return "usage: info <cmd>";
+              return "usage: info &lt;cmd&gt;";
             }
 
 
@@ -1504,7 +1504,7 @@ YOUR PUBLIC KEY GOES HERE
 
       addHistory(
         command,
-        `command not found: ${name}.\nuse "help" to see the available commands, or "info <cmd>" to learn more about a specific command.`
+        'command not found: ${name}.\nuse "help" to see the available commands, or `info &lt;cmd&gt;` to learn more about a specific command.'
       );
     }
 
